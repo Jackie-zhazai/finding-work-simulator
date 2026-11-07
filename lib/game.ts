@@ -1,72 +1,103 @@
-export type Mode = 'random' | 'custom';
-export type Stats = {skill:number; project:number; interview:number; energy:number; money:number; stress:number; research:number};
-export type Profile = {name:string; grade:string; school:string; gender:string; direction:string; internship:string; support:string; reality:string};
-export type Choice = {label:string; hint:string; effects:Partial<Stats>; action?:string; route?:string};
-export type GameEvent = {id:string; tag:string; title:string; body:string; options:Choice[]};
-export type RecordItem = {id:string; date:string; title:string; choice:string; outcome:string; before:Stats; after:Stats};
-export type Game = {version:number; id:string; seed:number; mode:Mode; profile:Profile; stats:Stats; step:number; month:number; gradMonth:number; route:string; job:string; offers:number; history:RecordItem[]; complete:boolean};
-export const GRADES=['大二','大三','大四','研一','研二','研三'];
-export const DIRECTIONS=['后端开发','前端开发','移动端开发','尚未确定'];
-export const SCHOOLS=['研究型高校','普通一本','其他本科院校'];
+import {GRADES,DIRECTIONS,SCHOOLS,CITIES,cityInfo,FAMILIES,SUPPORTS,INTERNSHIPS,PROJECTS,COMPETITIONS,RESEARCH,GOALS,LIVING} from './world';
+import {PLAN,selectEvent,EVENT_COUNT} from './event-bank';
+export {GRADES,DIRECTIONS,SCHOOLS,CITIES,FAMILIES,SUPPORTS,INTERNSHIPS,PROJECTS,COMPETITIONS,RESEARCH,GOALS,EVENT_COUNT};
+export const TOTAL_STEPS=PLAN.length;
+export type Mode='random'|'custom';
+export type Stats={skill:number;project:number;interview:number;energy:number;money:number;stress:number;research:number};
+export type Profile={name:string;grade:string;school:string;gender:string;direction:string;internship:string;support:string;reality:string;degree:string;hometown:string;city:string;family:string;gpa:string;project:string;competition:string;research:string;goal:string;living:string;trait:string};
+export type Choice={label:string;hint?:string;effects:Partial<Stats>;action?:string;route?:string;flag?:string;city?:string};
+export type GameEvent={id:string;tag:string;title:string;body:string;options:Choice[]};
+export type RecordItem={id:string;eventId:string;date:string;title:string;choice:string;outcome:string;before:Stats;after:Stats;city:string;route:string};
+export type Job={title:string;company:string;city:string;monthly:number;cost:number;arrangement:string;content:string;stage:'实习'|'正式工作'|'自由协作'|'过渡工作'};
+export type Game={version:number;id:string;seed:number;mode:Mode;profile:Profile;stats:Stats;step:number;month:number;gradMonth:number;route:string;degree:string;city:string;job:string;employment:Job|null;offers:number;history:RecordItem[];complete:boolean;flags:string[];recentEvents:string[];studyAdded:boolean;randomFields:string[]};
+export type Recent={names:string[];signatures:string[];events:string[]};
 const clamp=(n:number)=>Math.max(0,Math.min(100,n));
 export function random(g:Game){g.seed=(Math.imul(g.seed,1664525)+1013904223)>>>0;return g.seed/4294967296;}
-export function createGame(mode:Mode, input:Partial<Profile>={}, seed=Date.now()>>>0):Game{
- const g:Game={version:1,id:'fw-'+seed.toString(36),seed,mode,profile:{} as Profile,stats:{skill:35,project:25,interview:25,energy:78,money:6500,stress:25,research:25},step:0,month:0,gradMonth:12,route:'开发',job:'',offers:0,history:[],complete:false};
- const pick=<T,>(arr:T[])=>arr[Math.floor(random(g)*arr.length)];
- const grade=input.grade&&input.grade!=='随机'?input.grade:pick(GRADES);
- g.profile={name:input.name||pick(['林予','陈一然','许知远','周可','沈言','陆星']),grade,school:input.school||pick(SCHOOLS),gender:input.gender|| (random(g)<.6?'男':'女'),direction:input.direction||pick(DIRECTIONS.slice(0,3)),internship:input.internship||pick(['暂无实习','小团队开发实习','有相关开发实习']),support:input.support||pick(['可支持基本生活','需要尽早获得收入','有一定试错空间']),reality:input.reality||'假设角色'};
- g.gradMonth=({大二:32,大三:20,大四:8,研一:32,研二:20,研三:8} as {[k:string]:number})[grade];
- if(g.profile.internship!=='暂无实习'){g.stats.skill+=12;g.stats.project+=18;}
- if(grade.startsWith('研')){g.stats.research+=22;g.stats.skill+=6;}
- g.stats.money=g.profile.support==='需要尽早获得收入'?2500:g.profile.support==='有一定试错空间'?14000:6500;
+export function signature(p:Profile){return [p.grade,p.school,p.city,p.family,p.support,p.direction,p.internship,p.project].join('|');}
+export function createGame(mode:Mode,input:Partial<Profile>={},seed=Date.now()>>>0,recent:Partial<Recent>={}):Game{
+ const g:Game={version:2,id:'fw-'+seed.toString(36),seed,mode,profile:{} as Profile,stats:{skill:0,project:0,interview:0,energy:0,money:0,stress:0,research:0},step:0,month:0,gradMonth:20,route:'开发',degree:'本科',city:'武汉',job:'',employment:null,offers:0,history:[],complete:false,flags:[],recentEvents:recent.events?.slice(-120)||[],studyAdded:false,randomFields:[]};
+ const pick=<T,>(a:readonly T[])=>a[Math.floor(random(g)*a.length)];
+ const chosen=(v:string|undefined,values:string[])=>v&&v!=='随机'?v:pick(values);
+ const grade=chosen(input.grade,GRADES),degree=grade.startsWith('研')?'硕士':'本科';
+ const surnames='陈林李王张刘周黄赵吴徐孙胡朱高何郭马罗梁宋郑谢韩唐许邓冯曹彭曾萧田董袁潘蒋蔡余杜叶程苏魏吕丁任沈姚卢姜崔钟谭陆汪范金石廖贾夏韦傅方白邹孟熊秦邱江尹薛阎段雷侯龙史陶黎贺顾毛郝龚邵万钱严覃武戴莫孔向汤';
+ const given=['予安','知远','沐晴','一然','可欣','子衡','嘉宁','星河','明哲','亦舟','若溪','书言','思源','景行','安禾','清和','晓川','雨桐','承宇','青禾','念初','泽','可','言','宁','澄','岚','笙','桐','川','熙','晏','茵','遥','望舒','怀瑾','云舒','序','时雨','允之','初阳','以南','闻溪','若谷','庭安','语棠','逸帆','沛然','锦书','见山'];
+ let name=input.name&&input.name!=='随机'?input.name:'';
+ for(let i=0;!name&&i<40;i++){const candidate=pick([...surnames])+pick(given);if(!recent.names?.includes(candidate))name=candidate;}
+ if(!name)name=pick([...surnames])+pick(given);
+ const family=chosen(input.family,FAMILIES);
+ let support=input.support&&input.support!=='随机'?input.support:family.includes('宽裕')?'有一定试错空间':family.includes('负债')||family.includes('支出')?'需要尽早获得收入':pick(SUPPORTS);
+ let profile:Profile={name,grade,degree,school:chosen(input.school,SCHOOLS),gender:chosen(input.gender,['男','女']),direction:chosen(input.direction,DIRECTIONS),internship:chosen(input.internship,INTERNSHIPS),support,reality:input.reality||'假设角色',hometown:chosen(input.hometown,CITIES),city:chosen(input.city,CITIES),family,gpa:chosen(input.gpa,['前10%','前10%—30%','中等','课程有短板','有挂科待补']),project:chosen(input.project,PROJECTS),competition:chosen(input.competition,COMPETITIONS),research:chosen(input.research,grade.startsWith('研')?RESEARCH.slice(1):RESEARCH.slice(0,4)),goal:chosen(input.goal,GOALS),living:chosen(input.living,grade.startsWith('研')||grade.startsWith('大')?LIVING:LIVING.slice(1)),trait:chosen(input.trait,['喜欢独立钻研','擅长沟通协作','行动快但容易分散','谨慎，需要更多信息','喜欢可见的交付','节奏稳定，重视生活'])};
+ // Locked fields remain locked; reroll only unlocked parts of an accidentally repeated combination.
+ for(let i=0;i<12&&recent.signatures?.includes(signature(profile));i++){if(!input.city||input.city==='随机')profile.city=pick(CITIES);if(!input.project||input.project==='随机')profile.project=pick(PROJECTS);if(!input.internship||input.internship==='随机')profile.internship=pick(INTERNSHIPS);}
+ g.profile=profile;g.city=profile.city;g.degree=degree;g.randomFields=Object.keys(profile).filter(k=>!input[k as keyof Profile]||input[k as keyof Profile]==='随机');
+ g.gradMonth=({大二:32,大三:20,大四:8,研一:32,研二:20,研三:8} as Record<string,number>)[grade]||20;
+ const hasIntern=profile.internship!=='暂无实习'&&profile.internship!=='校园团队项目协作';
+ g.stats={skill:22+Math.floor(random(g)*24)+(hasIntern?8:0),project:15+Math.floor(random(g)*25)+(hasIntern?12:0),interview:18+Math.floor(random(g)*25),energy:62+Math.floor(random(g)*30),money:support==='需要尽早获得收入'?1800+Math.floor(random(g)*3000):support==='有一定试错空间'?11000+Math.floor(random(g)*19000):4500+Math.floor(random(g)*6000),stress:12+Math.floor(random(g)*25),research:degree==='硕士'?35+Math.floor(random(g)*25):8+Math.floor(random(g)*20)};
+ if(profile.project.includes('尚无'))g.stats.project=Math.max(8,g.stats.project-12);
+ if(profile.gpa==='前10%')g.stats.skill+=6;
+ if(profile.gpa.includes('挂科')){g.stats.research=Math.max(5,g.stats.research-8);g.stats.stress+=6;}
  return g;
 }
-const c=(label:string,hint:string,effects:Partial<Stats>,action?:string,route?:string):Choice=>({label,hint,effects,action,route});
-export function eventFor(g:Game):GameEvent{
- const p=g.profile,s=g.stats;
- const list:GameEvent[]=[
- {id:'direction',tag:'方向探索',title:'先从哪里开始？',body:`${p.grade}的课表还没结束，身边已经有人开始准备实习。你想做${p.direction}，但能够投入的时间有限。这一阶段，你决定把重心放在哪里？`,options:[c('把一个项目真正做完','补齐功能、部署和文档，积累可解释的经历。',{project:18,skill:8,energy:-9,money:-300}),c('先补基础和算法','打牢基础，项目进度暂缓。',{skill:18,interview:6,energy:-12}),c('先了解岗位，再选方向','比较要求，向学长学姐了解实际工作。',{interview:10,project:5,stress:-5}),c('先照顾生活节奏','恢复精力，为下一阶段保留空间。',{energy:18,stress:-12,money:-300})]},
- {id:'project',tag:'能力积累',title:'项目不只是写在简历上',body:'你做的项目能够运行，但面试官可能会追问：为什么这么设计？谁会使用它？目前还有一段时间可以调整。',options:[c('补测试、部署与技术说明','把现有作品做得可信。',{project:16,interview:9,energy:-10}),c('再学一个热门框架','拓宽技术接触面，但不会自动形成项目经历。',{skill:13,project:4,energy:-10}),c('找真实需求，小范围交付','练习沟通和交付，也承担返工。',{project:17,interview:7,money:400,energy:-15}),c('兼顾课程与毕业任务','减少眼前冲突。',{research:13,energy:4,stress:-7})]},
- {id:'first-apply',tag:'实习投递',title:'第一批简历，投向哪里？',body:`你开始投递开发实习。${p.internship==='暂无实习'?'这是你第一次真正进入招聘流程。':'已有经历可以写进简历，但相关性仍然重要。'}以下机会来自虚构岗位，筛选结果由本局准备与模拟招聘条件共同产生。`,options:[c('集中投大型企业开发岗','准备要求较高，竞争与不确定性更大。',{energy:-12,stress:5},'apply-hard'),c('投递与项目匹配的中小团队','更关注能否解释并完成具体业务。',{energy:-8},'apply'),c('先改简历，下一批再投','积累表达，消耗一个机会窗口。',{interview:17,project:5,stress:3}),c('尝试测试、数据或技术支持机会','探索邻近方向，不等于放弃技术。',{skill:5,interview:9},'apply-adjacent','其他技术')]},
- {id:'interview',tag:'面试现场',title:'“讲一个你真正解决的问题”',body:'面试官没有直接问框架名称，而是追问项目中的一次故障、你的判断和最终结果。你决定如何准备接下来的面试？',options:[c('复盘项目，明确自己的贡献','承认边界，把过程讲清楚。',{interview:17,project:8,energy:-8}),c('集中刷题和模拟技术问答','提高基础题的熟练度。',{skill:13,interview:9,energy:-12}),c('找人做一次模拟面试','接收反馈，暴露不熟悉的部分。',{interview:19,money:-300,stress:-5}),c('减少投递，先恢复状态','面试准备也需要精力。',{energy:20,stress:-15})]},
- {id:'crossroad',tag:'路径选择',title:'你还想沿着这条路走吗？',body:`几轮体验之后，你发现自己${s.project>s.skill?'更喜欢把一个东西交付出来。':'还在寻找适合自己的工作方式。'}继续开发、换一种工作，或继续深造，都需要新的投入。`,options:[c('继续开发，把准备做深','保留目前积累，收敛目标。',{skill:10,project:10,energy:-9},undefined,'开发'),c('转向产品、运营等岗位','开始补用户分析与沟通的实践。',{interview:15,project:5,energy:-8},undefined,'产品 / 运营'),c(p.grade.startsWith('研')?'申请博士，继续研究':'准备读研，重新安排时间','延长在校时间，增加研究与毕业要求。',{research:20,money:-1200,stress:8},'study','升学'),c('尝试自由职业或小型业务','先验证小需求，承担收入波动。',{project:10,money:-500,energy:-8},undefined,'自由职业')]},
- {id:'constraint',tag:'现实边界',title:'机会和生活，并不总在同一个地方',body:p.support==='需要尽早获得收入'?'生活费逐渐紧张。一份有收入但相关性一般的工作，和一份需要异地投入的机会同时出现。':'一个异地机会需要搬家，也会打乱课程或研究安排。你需要决定可以承受多少试错成本。',options:[c('优先本地且有收入的机会','缩小范围，减少现金压力。',{money:2300,project:5,energy:-8}),c('为相关机会承担搬迁成本','是否获得机会仍有不确定性。',{money:-1500,interview:8,stress:6},'apply'),c('协商时长、地点和任务','协商不一定成功，但能明确边界。',{interview:11,energy:-5,stress:-4}),c('暂停投递，先完成学业要求','为毕业保留确定进度。',{research:18,stress:-5,money:-500})]},
- {id:'screen',tag:'岗位筛选',title:'有些门槛，不靠多刷一道题改变',body:p.school==='研究型高校'?'某虚构集团的岗位限定毕业批次和相关研究方向。学校背景让你进入初筛，但不能代替接下来的评价。':'某虚构集团的本批岗位设置了院校筛选，你未进入下一轮。这只代表这个岗位的规则，不能推断所有企业。',options:[c('调整目标，扩大匹配岗位','把有限时间用在可进入的流程。',{interview:7,energy:-7},'apply'),c('询问其他岗位或补充材料','争取解释机会，不保证改变硬门槛。',{interview:8,energy:-5,stress:3}),c('补足作品，等待下一轮','项目仍可迁移到其他机会。',{project:13,skill:5,money:-400}),c('重新评估方向与城市','接受目标变化，探索另一种安排。',{interview:10,stress:-8},undefined,'其他技术')]},
- {id:'graduate',tag:'毕业节点',title:'从校园走向下一段生活',body:g.route==='升学'?'你选择延长学术路径。课程、研究与毕业任务并不会自动完成，需要重新平衡。时间线将以摘要跳过平淡学期。':'毕业要求、求职流程和离校安排同时临近。毕业本身也需要投入，不只是求职背景中的一个日期。',options:[c('优先把毕业条件完成','为离校或继续研究建立基础。',{research:22,energy:-10,stress:-7}),c('协调求职与毕业任务','同时推进，精力消耗更大。',{research:12,interview:9,energy:-16},'apply'),c('争取延期，换取准备空间','推迟毕业半年，增加生活成本。',{research:15,skill:10,money:-900,stress:5},'delay'),c('重新安排路线，先获得收入','接受过渡安排，继续保留调整机会。',{money:1600,interview:6,energy:-9},undefined,'过渡就业')]},
- {id:'first-job',tag:'进入行业',title:g.job?'第一份经历，接下来怎么用？':'离开校园后，还在寻找机会',body:g.job?`你目前的机会是「${g.job}」。岗位名称不等于每天的内容，你开始看到工作节奏与真实任务。`:'你还没有落实合适的岗位。继续准备、接受过渡工作或换方向，各自意味着不同的成本。',options:[c('继续投递匹配岗位','以已经积累的准备参加新流程。',{interview:5,energy:-10},'apply'),c('接受过渡工作，保住现金流','为后续调整保留生活条件。',{money:4000,energy:-12},'bridge'),c('聚焦一个可交付作品','用有限时间补充实践证据。',{project:18,skill:8,money:-600,energy:-10}),c('尝试产品、运营方向','重新理解岗位要求，不承诺一转就成。',{interview:14,energy:-9},'apply-other','产品 / 运营')]},
- {id:'work',tag:'工作与成长',title:'工作之后，问题也会变化',body:g.job?'任务越来越熟悉，但你想知道自己是在积累能力，还是只是在重复。':'没有固定岗位，并不意味着这段时间什么都没有发生。你需要决定如何继续安排。',options:[c('争取完整负责一件事','积累具体成果，承担更多责任。',{project:18,skill:9,energy:-14,money:1800}),c('系统补足基础','为之后转岗或求职做准备。',{skill:18,interview:6,money:-500,energy:-9}),c('建立稳定的生活节奏','保留长期行动的空间。',{energy:23,stress:-16,money:800}),c('做一笔小型自由业务','学习寻找需求、交付和收款。',{project:11,money:2200,energy:-12},undefined,'自由职业')]},
- {id:'change',tag:'再次选择',title:'你可以改变最初的方向',body:'一年左右过去了。你对工作、收入和生活的理解，比开局时具体了。原来的目标可以保留，也可以修改。',options:[c('留在当前路径继续积累','继续改善具体短板。',{skill:11,project:11,money:1600,energy:-8}),c('尝试新的开发或技术岗位','已有经验部分迁移，重新参加筛选。',{interview:8,energy:-10},'apply-adjacent','其他技术'),c('转向非开发岗位','补沟通与业务理解，接受重新适应。',{interview:10,energy:-10},'apply-other','产品 / 运营'),c('暂时休整，再作决定','减少压力，也需要生活储备。',{energy:24,stress:-22,money:-1500},undefined,'休整与探索')]},
- {id:'settle',tag:'两年之后',title:'你希望留下怎样的生活？',body:'临近这段模拟的终点，下一次选择不会决定你的一生。它只代表你目前愿意优先守住的东西。',options:[c('继续争取更匹配的工作','再试一个机会，接受不确定。',{interview:7,energy:-8},'apply'),c('稳定收入与日常生活','把可持续性放在前面。',{money:2200,energy:12,stress:-9}),c('为长期转向准备作品','结局仍然允许未完成的探索。',{project:16,skill:7,money:-600}),c('接受阶段结果，给自己空间','不把一次模拟当作最终判决。',{energy:15,stress:-18})]}
- ];
- return list[Math.min(g.step,list.length-1)];
-}
+export const eventFor=selectEvent;
 export function dateLabel(month:number){const d=new Date(Date.UTC(2026,8+month,1));return `${d.getUTCFullYear()}.${String(d.getUTCMonth()+1).padStart(2,'0')}`;}
+function nextMonth(g:Game){if(g.step<=16)return Math.floor(g.gradMonth*g.step/16);return g.gradMonth+Math.round(24*(g.step-16)/(TOTAL_STEPS-16));}
+function jobFor(g:Game,action:string):Job{
+ const pick=<T,>(a:T[])=>a[Math.floor(random(g)*a.length)];
+ const stage=g.step<16?'实习':'正式工作';
+ let title=g.profile.direction==='尚未确定'?'软件开发':g.profile.direction;
+ let content='完成需求实现、测试、联调与维护';
+ if(action==='apply-adjacent'){title=pick(['测试开发','数据支持','实施工程','运维支持']);content='处理系统问题、协助交付并完善自动化';}
+ else if(action==='apply-research'||g.route==='研究 / 深造'){title='研究工程助理';content='复现实验、整理数据并实现研究原型';}
+ else if(g.route==='测试 / 质量'){title='测试与质量工程';content='设计用例、复现问题并完善回归检查';}
+ else if(g.route==='考试与公共服务'){title='公共服务项目协作';content='承担信息整理与服务执行；这不代表通过编制考试';}
+ else if(action==='apply-other'||g.route==='产品 / 运营'||g.route==='行业转向'){title=g.route==='行业转向'?pick(['行业解决方案','客户成功','业务分析','技术销售']):pick(['产品助理','内容运营','业务运营']);content='理解用户与业务，协调交付并验证效果';}
+ const scale=pick(['本地小型团队','中型业务团队','行业软件企业','制造企业信息化部门','大型企业业务组','服务交付团队']);
+ const quality=g.stats.skill*.35+g.stats.project*.35+g.stats.interview*.3;
+ const monthly=stage==='实习'?Math.round((2200+quality*35+random(g)*1100)/100)*100:Math.round((4200+quality*75+random(g)*2100+(cityInfo(g.city).cost>3500?1200:0))/100)*100;
+ return {title,company:scale,city:g.city,monthly,cost:cityInfo(g.city).cost,arrangement:pick(['任务节奏较稳定','阶段性忙碌，需要协调边界','沟通较多，任务切换频繁','独立任务较多，需主动寻求反馈']),content,stage};
+}
 export function applyChoice(input:Game,index:number):Game{
- if(input.complete)return input;
- const g:Game=JSON.parse(JSON.stringify(input));const ev=eventFor(g),o=ev.options[index];if(!o)throw Error('无效选项');
- const before={...g.stats};
- for(const [k,v]of Object.entries(o.effects)){const key=k as keyof Stats;g.stats[key]=key==='money'?g.stats.money+(v||0):clamp(g.stats[key]+(v||0));}
- if(o.route)g.route=o.route;
- let outcome='这次投入已记入经历，部分影响会在之后出现。';
- if(o.action==='study'){g.gradMonth+=g.profile.grade.startsWith('研')?48:36;outcome='升学路线已记录。毕业节点后移，未来研究阶段将以关键事件与摘要推进。';}
- if(o.action==='delay'){g.gradMonth+=6;outcome='毕业节点延后半年。准备空间增加，生活成本也继续累积。';}
- if(o.action==='bridge'){g.job='过渡岗位';outcome='你接受了过渡工作。现金流改善，未来仍可以调整。';}
- if(o.action?.startsWith('apply')){
- const adjacent=o.action==='apply-adjacent',other=o.action==='apply-other',hard=o.action==='apply-hard';
- const preparedness=other?(g.stats.interview*.6+g.stats.project*.4):(g.stats.skill*.35+g.stats.project*.35+g.stats.interview*.3);
- const chance=Math.max(.1,Math.min(.86,.12+preparedness/120+(g.stats.energy-50)/400-(hard?.2:0)));
- const roll=random(g);
- if(roll<.08){outcome='该虚构岗位临时取消。本轮没有进入交付，这部分来自外部变化。';g.stats.stress=clamp(g.stats.stress+5);}
- else if(roll<chance){g.offers++;g.job=other?'产品 / 运营岗位':adjacent?'相关技术岗位':g.route==='自由职业'?'项目协作机会':`${g.profile.direction==='尚未确定'?'开发':g.profile.direction}${g.step<7?'实习':'岗位'}`;g.stats.money+=g.step<7?1800:3500;outcome=`本轮获得「${g.job}」机会。准备与匹配增加了可能性，招聘随机性仍参与了结果。`;}
- else {g.stats.stress=clamp(g.stats.stress+7);outcome='本轮未获得机会。模拟综合了准备、匹配和招聘波动；仅凭拒绝不能确定现实中的原因。';}
+ if(input.complete)return input;if(input.version!==2)throw Error('旧版存档请重新开始');
+ const g:Game=JSON.parse(JSON.stringify(input)),ev=eventFor(g),option=ev.options[index];if(!option)throw Error('无效选项');const before={...g.stats};
+ let outcome='';
+ for(const [key,value]of Object.entries(option.effects)){const k=key as keyof Stats;g.stats[k]=k==='money'?g.stats.money+(value||0):clamp(g.stats[k]+(value||0));}
+ if(option.flag&&!g.flags.includes(option.flag))g.flags.push(option.flag);
+ if(option.route)g.route=option.route;
+ if(option.action==='study'&&!g.studyAdded){const years=g.degree==='本科'?3:4;g.degree=g.degree==='本科'?'硕士':'博士';g.gradMonth+=years*12;g.studyAdded=true;outcome+=`你选择继续攻读${g.degree}，毕业节点后移${years}年。后续会经过研究与毕业协调。`;}
+ if(option.action==='delay'){g.gradMonth+=6;outcome+='你主动延长半年完成学业，时间和生活成本一并增加。';}
+ if(option.action?.startsWith('direction:')){g.profile.direction=option.action.split(':')[1];outcome+=`你把下一阶段方向收敛到${g.profile.direction}，已有经历部分可迁移。`;}
+ if(option.action==='direction-next'){g.profile.direction=DIRECTIONS[(DIRECTIONS.indexOf(g.profile.direction)+1)%7];outcome+=`开始探索${g.profile.direction}，需要补相应技能。`;}
+ if(option.action==='move-next'||option.action==='home'){
+  const previous=g.city;g.city=option.action==='home'?g.profile.hometown:option.city||CITIES[(CITIES.indexOf(g.city)+5)%CITIES.length];
+  if(g.city!==previous){const cost=option.action==='home'?600:Math.round(cityInfo(g.city).cost*.7+600);g.stats.money-=cost;g.flags.push('moved');outcome+=`从${previous}迁往${g.city}，本次模拟搬迁支出¥${cost}。新城市的岗位仍需要申请。`;if(g.employment){g.employment=null;g.job='';outcome+='原岗位经历保留在时间线，当前重新进入求职阶段。';}}else outcome+='你保留当前城市，继续比较具体团队。';
  }
- if(g.stats.energy<25){g.stats.stress=clamp(g.stats.stress+8);outcome+=' 精力偏低，持续投入开始增加压力。';}
- if(g.stats.money<0){g.stats.stress=clamp(g.stats.stress+8);outcome+=' 当前储备已不足，需要考虑收入与支持。';}
- g.history.push({id:`${g.id}-c${g.step}`,date:dateLabel(g.month),title:ev.title,choice:o.label,outcome,before,after:{...g.stats}});
- g.step++;
- const fractions=[0,.12,.24,.36,.48,.62,.78,.94];
- g.month=g.step<8?Math.floor(g.gradMonth*fractions[g.step]):g.gradMonth+[0,4,10,17,24][Math.min(4,g.step-8)];
- if(g.step>=12){g.complete=true;g.month=g.gradMonth+24;}
+ if(option.action==='bridge'){g.employment={title:'过渡工作',company:'本地服务团队',city:g.city,monthly:3800,cost:cityInfo(g.city).cost,arrangement:'收入相对固定，准备时间需要另行安排',content:'承担日常服务与执行任务',stage:'过渡工作'};g.job='过渡工作';outcome+='你接受过渡工作，先稳定收入，未来仍可以调整。';}
+ if(option.action==='freelance'){g.employment={title:'小型项目协作',company:'独立客户',city:g.city,monthly:3000+Math.floor(random(g)*2500),cost:cityInfo(g.city).cost,arrangement:'项目收入有波动，不等同固定工资',content:'需求沟通、实现、验收与维护',stage:'自由协作'};g.job=g.employment.title;outcome+='获得一笔模拟项目，收入仍取决于持续获客与交付。';}
+ if(option.action==='rest'){outcome+='你留出休整时间；当前记录描述的是阶段安排，不是永久退出。';}
+ if(option.action==='intern'){g.flags.push('internship');g.stats.project=clamp(g.stats.project+5);outcome+='这段实习增加了实践接触，但不自动保证转正。';}
+ if(option.action?.startsWith('apply')){
+  const other=option.action==='apply-other',hard=option.action==='apply-hard';
+  const prep=other?g.stats.interview*.6+g.stats.project*.4:g.stats.skill*.35+g.stats.project*.35+g.stats.interview*.3;
+  const chance=Math.max(.1,Math.min(.82,.09+prep/130+(g.stats.energy-50)/550-(hard?.18:0)+(g.flags.includes('evidence')?.035:0)));
+  const roll=random(g);
+  if(roll<.07){outcome+='本批岗位临时冻结，已经投入的准备可以用于其他机会。';g.stats.stress=clamp(g.stats.stress+3);}
+  else if(roll<chance){const job=jobFor(g,option.action);g.employment=job;g.job=job.title;g.offers++;if(job.stage==='实习')g.flags.push('internship');g.stats.money+=job.stage==='实习'?1000:1800;outcome+=`获得${job.city}的${job.company}「${job.title}」${job.stage}机会。模拟月收入¥${job.monthly}，${job.arrangement}。`;}
+  else{outcome+='本轮未进入下一步。准备、岗位匹配与招聘波动共同参与，不能由拒信确定现实原因。';g.stats.stress=clamp(g.stats.stress+4);}
+ }
+ if(!outcome){const effect=Object.entries(option.effects).filter(([k])=>k!=='money').sort((a,b)=>(b[1]||0)-(a[1]||0))[0];const names:Record<string,string>={skill:'技术准备',project:'项目证据',interview:'表达与沟通',research:'学业进度',energy:'精力恢复',stress:'压力'};outcome=`你选择「${option.label}」。${effect&&(effect[1]||0)>0?`${names[effect[0]]}得到推进。`:''}${option.flag?'这段经历会被后续事件与解析引用。':'投入已经记录，机会仍需要继续验证。'}`;}
+ // Weeks/months contain recovery; repeated choices should not turn every route into forced exhaustion.
+ g.stats.energy=clamp(g.stats.energy+3);g.stats.stress=clamp(g.stats.stress-1);
+ if(g.stats.energy<20){g.stats.stress=clamp(g.stats.stress+4);outcome+=' 精力偏低，下一阶段需要留意负担。';}
+ if(g.stats.money<0){g.stats.stress=clamp(g.stats.stress+5);outcome+=' 储备不足，近期收入与支持变得更紧迫。';}
+ g.history.push({id:`${g.id}-c${g.step}`,eventId:ev.id,date:dateLabel(g.month),title:ev.title,choice:option.label,outcome,before,after:{...g.stats},city:g.city,route:g.route});
+ g.step++;g.month=Math.max(input.month,nextMonth(g));
+ if(input.month>=input.gradMonth){const months=Math.max(0,g.month-input.month);const budget=cityInfo(g.city).cost;const income=g.employment?.monthly||0;const net=(income-budget)*months;g.stats.money+=net;g.history[g.history.length-1].outcome+=` 随后${months}个月按模拟月收入¥${income}、生活预算¥${budget}结算，净变化${net>=0?'+':''}¥${net.toLocaleString()}。`;g.history[g.history.length-1].after={...g.stats};}
+ if(g.step===16&&g.employment?.stage==='实习'){g.flags.push('completed-internship');g.employment=null;g.job='';}
+ if(g.step>=TOTAL_STEPS){g.complete=true;g.month=g.gradMonth+24;}
  return g;
 }
-export function ending(g:Game){return {title:g.route==='休整与探索'?'仍在寻找自己的节奏':g.route==='自由职业'?'把路走成自己的项目':g.job?'在不确定中，落下一站':'路还没有走完',subtitle:g.job||'继续求职与探索',summary:`从${g.profile.grade}出发，你走过了${g.history.length}个关键选择，经历${Math.floor(g.month/12)}年${g.month%12}个月。最终路线是${g.route}，当前${g.job?'拥有'+g.job+'经历':'仍在寻找适合的机会'}。这是模拟中的阶段处境，不是对真实未来的预测。`};}
+export function ending(g:Game){
+ const job=g.employment;
+ const fit=g.profile.goal==='收入优先'?(job&&job.monthly-job.cost>3500?'现金流与最初目标较接近':'收入与生活成本仍需权衡'):g.profile.goal==='城市与家人距离'?(g.city===g.profile.hometown?'回到了家乡，距离目标有所实现':'留在异地，需要继续权衡距离'):g.profile.goal==='稳定与生活节奏'?(g.stats.energy>50&&g.stats.stress<50?'目前节奏相对可持续':'当前负担与稳定目标仍有差距'):'方向在过程中逐渐具体，还可以继续验证';
+ return {title:g.route==='休整与探索'?'仍在寻找自己的节奏':g.route==='自由职业'?'把路走成自己的项目':job?'在不确定中，落下一站':'路还没有走完',subtitle:job?`${job.city} · ${job.title}`:g.route==='研究 / 深造'?'研究与行业机会仍在探索':'继续求职与探索',summary:`从${g.profile.hometown}的生活背景与${g.profile.grade}阶段出发，你完成${g.history.length}次关键选择，走过${Math.floor(g.month/12)}年${g.month%12}个月。当前在${g.city}，${job?`从事${job.company}的${job.title}，主要${job.content}`:'暂未落实固定岗位'}。${fit}。这是模拟中的阶段处境，不是未来预测。`,fit};
+}
