@@ -1,15 +1,16 @@
 import {GRADES,DIRECTIONS,SCHOOLS,CITIES,cityInfo,FAMILIES,SUPPORTS,INTERNSHIPS,PROJECTS,COMPETITIONS,RESEARCH,GOALS,LIVING} from './world';
 import {PLAN,selectEvent,EVENT_COUNT} from './event-bank';
+import {practiceEvent,type PracticeBrief} from './practice';
 export {GRADES,DIRECTIONS,SCHOOLS,CITIES,FAMILIES,SUPPORTS,INTERNSHIPS,PROJECTS,COMPETITIONS,RESEARCH,GOALS,EVENT_COUNT};
 export const TOTAL_STEPS=PLAN.length;
 export type Mode='random'|'custom';
 export type Stats={skill:number;project:number;interview:number;energy:number;money:number;stress:number;research:number};
 export type Profile={name:string;grade:string;school:string;gender:string;direction:string;internship:string;support:string;reality:string;degree:string;hometown:string;city:string;family:string;gpa:string;project:string;competition:string;research:string;goal:string;living:string;trait:string};
-export type Choice={label:string;hint?:string;effects:Partial<Stats>;action?:string;route?:string;flag?:string;city?:string};
-export type GameEvent={id:string;tag:string;title:string;body:string;options:Choice[]};
+export type Choice={label:string;hint?:string;effects:Partial<Stats>;action?:string;route?:string;flag?:string;city?:string;result?:string};
+export type GameEvent={id:string;tag:string;title:string;body:string;options:Choice[];question?:string};
 export type RecordItem={id:string;eventId:string;date:string;title:string;choice:string;outcome:string;before:Stats;after:Stats;city:string;route:string};
 export type Job={title:string;company:string;city:string;monthly:number;cost:number;arrangement:string;content:string;stage:'实习'|'正式工作'|'自由协作'|'过渡工作'};
-export type Game={version:number;id:string;seed:number;mode:Mode;profile:Profile;stats:Stats;step:number;month:number;gradMonth:number;route:string;degree:string;city:string;job:string;employment:Job|null;offers:number;history:RecordItem[];complete:boolean;flags:string[];recentEvents:string[];studyAdded:boolean;randomFields:string[]};
+export type Game={version:number;id:string;seed:number;mode:Mode;profile:Profile;stats:Stats;step:number;month:number;gradMonth:number;route:string;degree:string;city:string;job:string;employment:Job|null;offers:number;history:RecordItem[];complete:boolean;flags:string[];recentEvents:string[];studyAdded:boolean;randomFields:string[];practice?:PracticeBrief};
 export type Recent={names:string[];signatures:string[];events:string[];genders?:string[]};
 const schoolWeights=[5,9,8,31,29,12,6];
 const internshipWeights:Record<string,number[]>={
@@ -19,8 +20,9 @@ const internshipWeights:Record<string,number[]>={
 const clamp=(n:number)=>Math.max(0,Math.min(100,n));
 export function random(g:Game){g.seed=(Math.imul(g.seed,1664525)+1013904223)>>>0;return g.seed/4294967296;}
 export function signature(p:Profile){return [p.grade,p.school,p.city,p.family,p.support,p.direction,p.internship,p.project].join('|');}
-export function createGame(mode:Mode,input:Partial<Profile>={},seed=Date.now()>>>0,recent:Partial<Recent>={}):Game{
+export function createGame(mode:Mode,input:Partial<Profile>={},seed=Date.now()>>>0,recent:Partial<Recent>={},practice?:PracticeBrief):Game{
  const g:Game={version:2,id:'fw-'+seed.toString(36),seed,mode,profile:{} as Profile,stats:{skill:0,project:0,interview:0,energy:0,money:0,stress:0,research:0},step:0,month:0,gradMonth:20,route:'开发',degree:'本科',city:'武汉',job:'',employment:null,offers:0,history:[],complete:false,flags:[],recentEvents:recent.events?.slice(-120)||[],studyAdded:false,randomFields:[]};
+ if(mode==='custom'&&practice)g.practice=practice;
  const pick=<T,>(a:readonly T[])=>a[Math.floor(random(g)*a.length)];
  const chosen=(v:string|undefined,values:string[])=>v&&v!=='随机'?v:pick(values);
  const weighted=(values:string[],weights:number[])=>{
@@ -66,7 +68,7 @@ export function createGame(mode:Mode,input:Partial<Profile>={},seed=Date.now()>>
  if(profile.gpa.includes('挂科')){g.stats.research=Math.max(5,g.stats.research-8);g.stats.stress+=6;}
  return g;
 }
-export const eventFor=selectEvent;
+export const eventFor=(game:Game)=>practiceEvent(game)??selectEvent(game);
 export function dateLabel(month:number){const d=new Date(Date.UTC(2026,8+month,1));return `${d.getUTCFullYear()}.${String(d.getUTCMonth()+1).padStart(2,'0')}`;}
 function nextMonth(g:Game){if(g.step<=16)return Math.floor(g.gradMonth*g.step/16);return g.gradMonth+Math.round(24*(g.step-16)/(TOTAL_STEPS-16));}
 export function jobTrack(title:string){
@@ -109,7 +111,7 @@ function jobFor(g:Game,track:string):Job{
 export function applyChoice(input:Game,index:number):Game{
  if(input.complete)return input;if(input.version!==2)throw Error('旧版存档请重新开始');
  const g:Game=JSON.parse(JSON.stringify(input)),ev=eventFor(g),option=ev.options[index];if(!option)throw Error('无效选项');const before={...g.stats};
- let outcome='';
+ let outcome=option.result||'';
  for(const [key,value]of Object.entries(option.effects)){const k=key as keyof Stats;g.stats[k]=k==='money'?g.stats.money+(value||0):clamp(g.stats[k]+(value||0));}
  if(option.flag&&!g.flags.includes(option.flag))g.flags.push(option.flag);
  if(option.route)g.route=option.route;

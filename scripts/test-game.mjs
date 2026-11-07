@@ -1,6 +1,19 @@
 import assert from 'node:assert/strict';
-import {gameModule} from './load-game.mjs';
+import {gameModule,practiceModule} from './load-game.mjs';
 const {createGame,eventFor,applyChoice,signature,TOTAL_STEPS,EVENT_COUNT,ending}=gameModule;
+for(const focus of practiceModule.FOCUSES){
+ const brief={focus,hours:'每周 3 小时',deadline:'两周内'};
+ let game=createGame('custom',{},17342,{},brief);
+ while(!game.complete){
+  const event=eventFor(game);
+  if(game.step===4){assert.equal(event.title,focus);assert.ok(event.question);assert.match(event.options[3].label,/一小时/);}
+  if(game.step===7)assert.match(event.body,/一小时做了初步验证/);
+  if(game.step===12)assert.ok(event.question);
+  game=applyChoice(game,game.step===4?3:0);
+ }
+ assert.equal(game.history.filter(entry=>entry.eventId.startsWith('practice-')).length,3);
+ assert.equal(practiceModule.practiceArtifact(game).steps.length,3);
+}
 const routes=new Set(),events=new Set(),cities=new Set(),profiles=new Set(),names=new Set();
 for(const grade of ['大二','大三','大四','研一','研二','研三'])for(let seed=1;seed<=100;seed++){
  let g=createGame('random',{grade},seed*293+7),previous=0;
