@@ -72,15 +72,6 @@ const cases:Record<PracticeBrief['focus'],Case>={
 };
 const effects:Choice['effects'][]=[{project:10,energy:-3},{interview:10},{project:6,interview:6},{energy:7,stress:-5}];
 
-export function practiceArtifact(game:Game){
- const brief=game.practice;
- if(!brief)return;
- const plan=game.history.find(entry=>entry.eventId.startsWith('practice-')&&entry.eventId.endsWith('-plan'));
- const initial=game.history.find(entry=>/^practice-\d+$/.test(entry.eventId));
- return plan?{goal:cases[brief.focus].deliverable,decision:plan.choice,next:plan.outcome.split(' 随后')[0],
-  steps:[`第 1—2 天：${initial?.choice||'核对最需要解决的问题'}。`,'第 3—5 天：完成一个能核对的样本或取得一次实际反馈。','第 7 天：核对完成情况和反馈，再决定继续、缩小范围或切换备选。']}:undefined;
-}
-
 export function practiceEvent(game:Game):GameEvent|undefined{
  const brief=game.practice;
  if(game.mode!=='custom'||!brief||![4,7,12].includes(game.step))return;

@@ -12,7 +12,7 @@ for(const focus of practiceModule.FOCUSES){
   game=applyChoice(game,game.step===4?3:0);
  }
  assert.equal(game.history.filter(entry=>entry.eventId.startsWith('practice-')).length,3);
- assert.equal(practiceModule.practiceArtifact(game).steps.length,3);
+ assert.ok(game.history.some(entry=>/^practice-\d+-plan$/.test(entry.eventId)));
 }
 const routes=new Set(),events=new Set(),cities=new Set(),profiles=new Set(),names=new Set();
 for(const grade of ['大二','大三','大四','研一','研二','研三'])for(let seed=1;seed<=100;seed++){

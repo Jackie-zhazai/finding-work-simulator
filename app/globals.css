@@ -11,7 +11,6 @@
 .inline-chat .chat-intro{padding:10px}
 .inline-chat .chat-intro svg{display:none}
 .inline-chat .chat-input textarea{min-height:65px}
-.practice-plan ol{list-style:decimal;padding-left:1.4em;margin:10px 0 14px}
 @media(max-width:760px){
  .game-grid>.story-column{display:contents}
  .game-grid>.right-rail{order:1}
