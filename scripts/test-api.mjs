@@ -1,0 +1,13 @@
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import ts from 'typescript';
+const js=ts.transpileModule(readFileSync(new URL('../lib/game.ts',import.meta.url),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText;
+const {createGame,applyChoice}=await import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));
+let game=createGame('custom',{grade:'研二',reality:'假设角色'},77);
+const kind=process.argv[2]||'advice';
+if(kind==='report')while(!game.complete)game=applyChoice(game,game.step===4?1:0);
+const response=await fetch('http://127.0.0.1:5173/api/agent',{method:'POST',headers:{'Content-Type':'application/json','Origin':'http://127.0.0.1:5173'},body:JSON.stringify({kind,message:'请分析当前选择的取舍，以及还需要了解什么。',game}),signal:AbortSignal.timeout(200000)});
+const result=await response.json();
+mkdirSync(new URL('../docs/verification/',import.meta.url),{recursive:true});
+writeFileSync(new URL('../docs/verification/'+kind+'.json',import.meta.url),JSON.stringify({testData:true,status:response.status,...result},null,2));
+console.log(JSON.stringify({status:response.status,kind,checked:result.checked,trace:result.trace,error:result.error,characters:result.text?.length}));
+if(!response.ok)process.exitCode=1;
