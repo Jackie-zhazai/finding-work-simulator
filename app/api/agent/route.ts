@@ -4,6 +4,17 @@ import { z } from 'zod';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
+function isSameOrigin(request: Request) {
+  const origin = request.headers.get('origin');
+  if (!origin) return true;
+  const url = new URL(request.url);
+  if (origin === url.origin) return true;
+  // Next.js can use an internal hostname in request.url behind its server or proxy.
+  const host = request.headers.get('host');
+  const protocol = request.headers.get('x-forwarded-proto') || url.protocol.slice(0, -1);
+  return !!host && (protocol === 'http' || protocol === 'https') && origin === `${protocol}://${host}`;
+}
+
 const rates=new Map<string,{count:number;time:number}>();
 let dailyModelCalls={day:'',count:0};
 const stats=z.object({skill:z.number().min(0).max(100),project:z.number().min(0).max(100),interview:z.number().min(0).max(100),energy:z.number().min(0).max(100),money:z.number().min(-1000000).max(1000000),stress:z.number().min(0).max(100),research:z.number().min(0).max(100)});
@@ -11,7 +22,7 @@ const short=z.string().max(200);
 const schema=z.object({kind:z.enum(['advice','report','feedback','plan']),message:z.string().max(2000).optional(),event:z.object({title:short,body:z.string().max(2000),options:z.array(z.object({label:short,hint:short.optional()})).max(6)}).nullable().optional(),game:z.object({mode:z.enum(['random','custom']),profile:z.object({name:z.string().max(40),grade:z.string().max(10),school:z.string().max(40),gender:z.string().max(20),direction:z.string().max(40),internship:z.string().max(80),support:z.string().max(80),reality:z.string().max(20),degree:short.optional(),hometown:short.optional(),city:short.optional(),family:short.optional(),gpa:short.optional(),project:short.optional(),competition:short.optional(),research:short.optional(),goal:short.optional(),living:short.optional(),trait:short.optional()}),stats,practice:z.object({focus:short,hours:short,deadline:short}).optional(),city:short.optional(),degree:short.optional(),gradMonth:z.number().max(600).optional(),month:z.number().max(700).optional(),complete:z.boolean().optional(),flags:z.array(short).max(100).optional(),randomFields:z.array(short).max(40).optional(),employment:z.object({title:short,company:short,city:short,monthly:z.number().max(1000000),cost:z.number().max(100000),arrangement:short,content:short,stage:short}).nullable().optional(),route:z.string().max(50),job:z.string().max(100),step:z.number().min(0).max(64),history:z.array(z.object({id:z.string().max(100),eventId:short.optional(),date:z.string().max(20),title:z.string().max(200),choice:z.string().max(300),outcome:z.string().max(1000),city:short.optional(),route:short.optional()})).max(64)}),messages:z.array(z.object({role:z.enum(['user','assistant']),content:z.string().max(4000)})).max(10).optional()});
 export async function GET(){return Response.json({configured:!!setting('MIMO_API_KEY'),model:setting('MIMO_MODEL')||'mimo-v2.6-pro',storage:'browser-local',note:'Demo 按浏览器保存；API 输入为客户端模拟记录，不作为现实履历证明。'});}
 export async function POST(request:Request){
- const origin=request.headers.get('origin');if(origin&&origin!==new URL(request.url).origin)return Response.json({error:'不允许跨站请求'}, {status:403});
+ if(!isSameOrigin(request))return Response.json({error:'不允许跨站请求'}, {status:403});
  if(Number(request.headers.get('content-length')||0)>60000)return Response.json({error:'请求过大'},{status:413});
  const ip=request.headers.get('cf-connecting-ip')||request.headers.get('x-forwarded-for')||'local';
  const now=Date.now();if(rates.size>2000)rates.clear();const rate=rates.get(ip);if(rate&&now-rate.time<60000&&rate.count>=8)return Response.json({error:'请求较频繁，请一分钟后重试。'},{status:429});rates.set(ip,{time:rate&&now-rate.time<60000?rate.time:now,count:rate&&now-rate.time<60000?rate.count+1:1});
