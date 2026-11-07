@@ -27,7 +27,7 @@ const raw:[string,Stage,string,string,Choice[]][]=[
  ['i03','intern','实习机会在另一座城','搬家和押金需要先支付，收入要到下个月才到账。',[o('确认合同与预算后再去',{interview:5,money:-1200},'apply',undefined,'前期支出明确，机会仍不确定。'),o('先找当地同学了解住宿',{interview:7,money:-300}),o('优先当前城市机会',{energy:-4},'apply'),o('尝试远程短期协作',{project:6,money:500},undefined,'自由职业')]],
  ['i04','intern','导师很忙，任务却不少','实习中遇到的问题无人立即回答，交付时间仍在接近。',[o('整理问题，约定集中沟通',{interview:8,project:6}),o('先独立定位最小问题',{skill:9,project:5,energy:-6},undefined,undefined,'','debugged'),o('明确风险并调整交付',{interview:9,stress:-3}),o('加班兜底全部任务',{project:10,energy:-14,stress:8})]],
  ['i05','intern','两份实习邀请','一份内容相关但补贴少，另一份收入较好但任务偏重复。',[o('选择相关任务，控制预算',{project:10,money:-500,energy:-6},'intern'),o('选择收入，另留学习时间',{money:1800,skill:4,energy:-8},'bridge'),o('进一步确认导师与转正规则',{interview:10}),o('继续寻找第三种安排',{stress:4,energy:-5},'apply')]],
- ['i06','intern','找不到第一段实习','几批投递没有推进，你开始怀疑简历中的证据是否足够。',[o('只改最薄弱的一个项目',{project:10,interview:5,energy:-5}),o('扩大公司类型与规模',{interview:4,energy:-6},'apply'),o('考虑测试或实施的入口',{interview:6,skill:4},'apply-adjacent','测试 / 质量'),o('休整几天，重新安排',{energy:12,stress:-10})]],
+ ['i06','intern','找不到第一段实习','几批投递没有推进，你开始怀疑简历中的证据是否足够。',[o('只改最薄弱的一个项目',{project:10,interview:5,energy:-5}),o('扩大公司类型与规模',{interview:4,energy:-6},'apply'),o('考虑测试或实施的入口',{interview:6,skill:4},'apply-adjacent'),o('休整几天，重新安排',{energy:12,stress:-10})]],
  ['i07','intern','转正标准一直没明确','同事说有机会，但并没有人承诺名额和考核方式。',[o('正式询问标准与时间',{interview:10},undefined,undefined,'','verified-role'),o('保留外部投递',{energy:-7,stress:3},'apply'),o('整理实习成果，争取反馈',{project:9,interview:7},undefined,undefined,'','evidence'),o('把转正当备选，完成学业',{research:8,stress:-3})]],
  ['i08','intern','外包项目的成长与边界','项目上线快，但你接触不到核心设计，也不确定是否适合自己。',[o('争取完整负责一个小模块',{project:10,skill:4,energy:-6},undefined,undefined,'','ownership'),o('记录交付流程与业务理解',{interview:7,project:6}),o('寻找研发或其他技术岗位',{energy:-6},'apply-adjacent','其他技术'),o('先稳定收入再作打算',{money:1800,stress:-3},'bridge')]],
  ['v01','interview','面试官追问一次失败','你准备了成功演示，但对方想听你怎么发现问题、缩小范围和验证修复。',[o('复盘日志和排查过程',{interview:10,skill:4},undefined,undefined,'','evidence'),o('补一次完整故障演练',{skill:8,project:7,energy:-6},undefined,undefined,'','debugged'),o('约模拟面试暴露盲点',{interview:12,money:-200}),o('先恢复状态再安排下一场',{energy:12,stress:-8})]],
@@ -51,8 +51,8 @@ const raw:[string,Stage,string,string,Choice[]][]=[
  ['n03','entry','试用期的反馈很模糊','对方说需要更主动，但没有说明具体标准。',[o('确认可观察的交付目标',{interview:10,project:4},undefined,undefined,'','scoped'),o('每周同步进展与问题',{interview:8,stress:-4}),o('主动承担完整小任务',{project:11,energy:-7}),o('准备备选，避免单点依赖',{interview:5,energy:-5},'apply')]],
  ['n04','entry','岗位要求先培训再收费','一家虚构机构把就业机会与付费课程绑定，却不能明确岗位和退款安排。',[o('拒绝不明确的收费承诺',{stress:-3}),o('核对合同与可验证信息',{interview:8},undefined,undefined,'','verified-role'),o('通过学校或公开渠道找岗位',{energy:-5},'apply'),o('用免费资料补基础',{skill:8,energy:-4})]],
  ['n05','entry','产品岗位的第一次任务','你需要理解使用者和业务指标，而不是先选技术框架。',[o('访谈并整理核心问题',{interview:11,project:5},undefined,'产品 / 运营',undefined,'user-research'),o('先做小原型验证',{project:10,energy:-5},undefined,'产品 / 运营'),o('学习数据与业务分析',{skill:7,interview:6}),o('确认自己是否喜欢这类任务',{stress:-5,interview:5})]],
- ['n06','entry','测试岗位不只是点按钮','你要从需求中设计用例，复现偶发问题并和开发沟通。',[o('搭建回归检查',{skill:9,project:7,energy:-5},undefined,'测试 / 质量',undefined,'tested'),o('深入一个故障链路',{skill:10,project:5},undefined,undefined,'','debugged'),o('学习需求与风险分析',{interview:9,project:4}),o('继续准备开发转岗',{skill:8,energy:-5},'direction:后端开发','开发')]],
- ['n07','entry','接到第一笔小项目','客户希望先看到效果，再谈付款和维护。',[o('约定范围、阶段与付款',{interview:9,project:5},undefined,'自由职业',undefined,'scoped'),o('先做付费小样',{money:900,project:7,energy:-5},undefined,'自由职业'),o('核算成本再决定',{interview:8,stress:-3}),o('优先稳定岗位',{energy:-5},'apply')]],
+ ['n06','entry','测试岗位不只是点按钮','你要从需求中设计用例，复现偶发问题并和开发沟通。',[o('搭建回归检查',{skill:9,project:7,energy:-5},undefined,undefined,undefined,'tested'),o('深入一个故障链路',{skill:10,project:5},undefined,undefined,'','debugged'),o('学习需求与风险分析',{interview:9,project:4}),o('继续准备开发转岗',{skill:8,energy:-5},'direction:后端开发','开发')]],
+ ['n07','entry','接到第一笔小项目','客户希望先看到效果，再谈付款和维护。',[o('约定范围、阶段与付款',{interview:9,project:5},undefined,'自由职业',undefined,'scoped'),o('先做付费小样',{money:900,project:7,energy:-5},'freelance','自由职业'),o('核算成本再决定',{interview:8,stress:-3}),o('优先稳定岗位',{energy:-5},'apply')]],
  ['n08','entry','收到一份看起来稳定的机会','工作内容偏行业系统，技术栈并不热门，但地点和生活比较合适。',[o('确认内容后尝试',{energy:-4},'apply'),o('比较成长与收入的取舍',{interview:8}),o('继续找更相关岗位',{energy:-5,stress:3},'apply'),o('把稳定生活作为当前优先',{stress:-8,money:1200})]],
  ['g01','growth','重复任务里还能学什么','你已经熟悉日常工作，却担心停滞。',[o('争取独立负责一个模块',{project:11,skill:6,energy:-6},undefined,undefined,'','ownership'),o('把重复劳动自动化',{skill:10,project:7,energy:-5}),o('约一次成长反馈',{interview:9,stress:-3}),o('稳定生活，保持小步学习',{skill:5,energy:9,stress:-5})]],
  ['g02','growth','团队开始调整业务','你的任务被合并，未来安排还没明确。',[o('确认安排并整理成果',{interview:9,project:4},undefined,undefined,'','evidence'),o('启动外部面试',{energy:-6,stress:3},'apply'),o('寻找内部相邻岗位',{interview:6},'apply-adjacent','其他技术'),o('留出现金缓冲',{money:900,stress:-3})]],
@@ -61,17 +61,26 @@ const raw:[string,Stage,string,string,Choice[]][]=[
  ['g05','growth','同事邀请你一起做副业','想法有趣，但交付、客户与收入尚未验证。',[o('先做一个有限试验',{project:8,money:-400,energy:-5},undefined,'自由职业'),o('明确分工和退出条件',{interview:10},undefined,undefined,'','scoped'),o('访谈潜在使用者',{interview:8,project:4},undefined,undefined,'','user-research'),o('暂不参与，稳定主业',{energy:9,stress:-4,money:700})]],
  ['g06','growth','一次生产故障','团队需要尽快恢复服务，同时找出原因。',[o('先止损，再记录复盘',{project:10,skill:6,energy:-7},undefined,undefined,'','debugged'),o('明确分工并同步风险',{interview:10,project:6}),o('补监控与回归检查',{skill:10,project:8,energy:-5},undefined,undefined,'','tested'),o('寻求有经验同事协助',{skill:6,interview:6,stress:-4})]],
  ['g07','growth','工作和兴趣开始分开','你发现自己擅长的内容，并不完全是最初想做的方向。',[o('争取内部轮岗',{interview:6},'apply-adjacent','其他技术'),o('工作外做小型尝试',{project:9,energy:-6}),o('转向更喜欢的非技术任务',{interview:10},'apply-other','产品 / 运营'),o('接受阶段安排，继续积累',{skill:6,money:900,stress:-5})]],
- ['g08','growth','长期加班开始影响状态','收入和成长都重要，但精力已经不足。',[o('明确优先级与交付范围',{interview:9,energy:8,stress:-6}),o('安排休息与交接',{energy:18,stress:-12}),o('寻找节奏更合适的团队',{energy:-4},'apply'),o('阶段性离开，整理生活',{energy:22,stress:-15,money:-1200},'rest','休整与探索')]],
+ ['g08','growth','长期加班开始影响状态','收入和成长都重要，但精力已经不足。',[o('明确优先级与交付范围',{interview:9,energy:8,stress:-6}),o('安排休息与交接',{energy:18,stress:-12}),o('寻找节奏更合适的团队',{energy:-4},'apply'),o('离开现岗位，整理生活',{energy:22,stress:-15,money:-1200},'leave','休整与探索')]],
  ['s01','settle','两年后的目标，和起点不同','你更清楚自己愿意为收入、兴趣和生活分别付出多少。',[o('守住现在适合的部分',{energy:9,stress:-7,money:900}),o('再试一个更匹配机会',{energy:-4},'apply'),o('为转向准备可验证作品',{project:11,energy:-4}),o('给自己一段不急着决定的时间',{energy:15,stress:-10,money:-500},'rest','休整与探索')]],
  ['s02','settle','回到家乡，还是留在外地','你不再只比较岗位名称，也开始比较日常生活。',[o('回家乡寻找可持续工作',{stress:-6},'home'),o('留在当前城市，调整生活',{money:-300,energy:10}),o('试试另一座区域中心',{energy:-4},'move-next'),o('先问清弹性工作条件',{interview:8},'apply')]],
  ['s03','settle','想重新开始，需要多少准备','转向并不是清空过去，但也不是零成本切换。',[o('列出可迁移的经历',{interview:10,project:4}),o('做一次小规模方向试验',{project:10,energy:-5},undefined,'行业转向'),o('开始邻近岗位申请',{energy:-4},'apply-adjacent','其他技术'),o('先保留收入，逐步调整',{money:1200,stress:-4})]],
  ['s04','settle','一份新 Offer 与现状','新机会并非每个维度都更好，需要重新衡量。',[o('比较内容、地点与生活成本',{interview:9}),o('尝试更匹配的机会',{energy:-4},'apply'),o('留在熟悉团队继续成长',{project:8,money:1000}),o('不急着选择，确认合同细节',{interview:9},undefined,undefined,'','verified-role')]],
- ['s05','settle','没有标准答案的阶段总结','一些目标达到了，一些还在路上。你想把下一步留给什么？',[o('继续技术积累',{skill:9,project:5}),o('稳定收入与生活',{money:1400,energy:9,stress:-6}),o('扩大行业和岗位探索',{interview:8},undefined,'行业转向'),o('休整并重新确认目标',{energy:16,stress:-12},'rest','休整与探索')]],
- ['s06','settle','朋友提起考编与其他工作','你想了解另一类职业，但准备周期和岗位条件都需要重新核实。',[o('先了解资格与工作内容',{interview:8},undefined,'考试与公共服务'),o('保留收入，限定准备时段',{money:700,energy:-4},undefined,'考试与公共服务'),o('比较后继续当前路径',{skill:7,stress:-4}),o('先做一次真实任务体验',{project:7,interview:6},undefined,'行业转向')]],
- ['s07','settle','自由业务能否持续','有项目不等于有稳定收入，你需要考虑下一段时间。',[o('明确报价与维护范围',{interview:10,money:1200},undefined,'自由职业',undefined,'scoped'),o('寻找更稳定的客户需求',{project:8,interview:6},undefined,'自由职业'),o('把作品用于正式求职',{energy:-4},'apply'),o('控制支出，保留缓冲',{money:800,stress:-5})]],
+ ['s05','settle','没有标准答案的阶段总结','一些目标达到了，一些还在路上。你想把下一步留给什么？',[o('用新作品再试开发岗',{skill:9,project:5},'apply-development','开发','可以验证准备成果，也会占用一轮求职时间。'),o('稳定收入与生活',{money:1400,energy:9,stress:-6}),o('扩大行业和岗位探索',{interview:8},undefined,'行业转向'),o('休整并重新确认目标',{energy:16,stress:-12},'rest','休整与探索')]],
+ ['s06','settle','朋友提起考编与其他工作','你想了解另一类职业，但准备周期和岗位条件都需要重新核实。',[o('先了解资格与工作内容',{interview:8},undefined,'考试与公共服务'),o('申请公共服务项目，同时继续备考',{research:8,interview:5,energy:-5},'apply-public','考试与公共服务'),o('比较后继续当前路径',{skill:7,stress:-4}),o('先做一次真实任务体验',{project:7,interview:6},undefined,'行业转向')]],
+ ['s07','settle','自由业务能否持续','有项目不等于有稳定收入，你需要考虑下一段时间。',[o('明确报价与维护范围',{interview:10,money:1200},undefined,'自由职业',undefined,'scoped'),o('接受一份有明确范围的独立项目',{project:8,interview:6},'freelance','自由职业'),o('把作品用于正式求职',{energy:-4},'apply'),o('控制支出，保留缓冲',{money:800,stress:-5})]],
  ['s08','settle','重新定义这一段经历','你可以承认失落，也可以保留已经积累的东西。',[o('整理具体成果与不足',{interview:8,project:4},undefined,undefined,'','evidence'),o('和信任的人交流',{energy:10,stress:-10}),o('列出一个月内可做的行动',{skill:5,project:5,stress:-4}),o('先把生活照顾好',{energy:17,stress:-12})]]
 ];
-export const EVENT_BANK:Spec[]=raw.map(([id,stage,title,body,options])=>e(id,stage,title,body,options));
+function scenarioCondition(id:string):Spec['when'] {
+ if(id==='v06')return g=>g.profile.gender==='女';
+ if(id==='v07')return g=>!['985高校','211高校','双一流非211高校'].includes(g.profile.school);
+ if(id==='n01'||id==='n03')return g=>!!g.employment;
+ if(id==='n02')return g=>!g.employment;
+ if(id==='n05')return g=>g.route==='产品 / 运营'||/产品|运营/.test(g.job);
+ if(id==='n06')return g=>g.route==='测试 / 质量'||/测试|质量/.test(g.job);
+ return undefined;
+}
+export const EVENT_BANK:Spec[]=raw.map(([id,stage,title,body,options])=>e(id,stage,title,body,options,scenarioCondition(id)));
 const challenges:[string,string,string,string][]=[
  ['前端开发','交互在手机上失效','桌面演示正常，手机键盘弹出后却挡住了操作。','响应式与可访问性'],
  ['前端开发','页面加载慢在哪里','接口、图片和渲染都可能影响体验，不能只凭感觉优化。','性能与测量'],
@@ -93,7 +102,7 @@ const regions:[string,string,string][]=[['华北','离家与研究机会之间',
 regions.forEach(([region,title,body],i)=>EVENT_BANK.push(e('r'+i,'region',title,body,[o('先核算预算和通勤',{interview:6,money:300},undefined,undefined,'查看城市预算，并不保证真实支出。'),o('迁往另一座城市尝试',{energy:-5},'move-next',undefined,'需要搬迁支出，岗位仍须重新匹配。'),o('回到家乡附近寻找',{stress:-5},'home'),o('优先远程项目协作',{project:7,interview:4,money:500},undefined,'自由职业')],g=>cityInfo(g.city).region===region)));
 // A shared regional situation remains eligible for every profile.
 EVENT_BANK.push(e('r-shared','region','城市不是岗位的全部','同一座城市也有不同团队。你准备把地区、工作内容和生活放在一起比较。',[o('比较真实任务与合同条件',{interview:8},undefined,undefined,'','verified-role'),o('尝试跨城机会',{energy:-5},'move-next',undefined,'搬迁会消耗储备。'),o('回家乡附近寻找',{stress:-5},'home'),o('保留当前城市，扩大岗位范围',{energy:-4},'apply-adjacent','其他技术')]));
-EVENT_BANK.push(e('choose','choice','你还想沿着这条路走吗？','准备与接触岗位后，你可以继续开发、换方向、深造，或尝试其他职业。',[o('继续开发，把准备做深',{skill:7,project:6},undefined,'开发'),o('转向产品或运营',{interview:10,project:3},undefined,'产品 / 运营','需要补业务与沟通实践。','career-switch'),o('准备升学，延长研究路径',{research:13,money:-800},'study','研究 / 深造','毕业节点后移，增加研究与资金要求。'),o('尝试测试与质量岗位',{skill:6,interview:5},undefined,'测试 / 质量')]));
+EVENT_BANK.push(e('choose','choice','你还想沿着这条路走吗？','准备与接触岗位后，你可以继续开发、换方向、深造，或尝试其他职业。',[o('继续开发，把准备做深',{skill:12,project:9},undefined,'开发'),o('转向产品或运营',{interview:10,project:3},undefined,'产品 / 运营','需要补业务与沟通实践。','career-switch'),o('准备升学，延长研究路径',{research:13,money:-800},'study','研究 / 深造','毕业节点后移，增加研究与资金要求。'),o('专门准备质量工程岗位',{skill:6,interview:5},undefined,'测试 / 质量','需要练习用例设计、故障定位和自动化。','tested')]));
 EVENT_BANK.push(e('graduate','graduate','毕业前的最后一段协调','毕业、求职和离校同时接近。当前毕业准备会影响是否需要延期。',[o('优先完成毕业条件',{research:17,energy:-5},undefined,undefined,'','grad-plan'),o('协调入职和答辩时间',{research:10,interview:6}),o('主动延期半年，补足准备',{research:14,skill:5,money:-700},'delay',undefined,'预计毕业时间后移半年。'),o('先安排收入，再逐项完成',{research:8,money:1000,energy:-5})]));
 EVENT_BANK.push(e('change','change','新的选择，不必抹掉过去','工作一段时间后，你有了比最初更具体的判断。方向可以调整，但需要准备与验证。',[o('留在当前路径继续积累',{project:8,skill:5}),o('换一个技术方向试试',{skill:5,interview:5},'direction-next','开发','已有经验部分迁移，需要补新方向基础。'),o('转向产品、运营或其他行业',{interview:9,energy:-4},'apply-other','行业转向'),o('阶段性休整，再确认目标',{energy:20,stress:-14,money:-700},'rest','休整与探索')]));
 // Route-specific follow-ups; they supplement shared situations, rather than isolating people into rigid stories.
@@ -103,7 +112,7 @@ const routeEvents:[string,string,string,string,string][]=[
  ['f01','自由职业','客户拖延确认需求','不明确的范围增加返工与收款风险。','交付范围与合同'],['f02','自由职业','项目结束，维护还在继续','你需要决定哪些维护属于原约定。','维护边界'],['f03','自由职业','报价能否覆盖时间','收入必须扣除沟通、维护和空档成本。','成本与可持续性'],
  ['x01','研究 / 深造','研究方向需要缩小','原计划太大，短期难以形成可验证进展。','研究范围'],['x02','研究 / 深造','行业研究还是继续学术','研究兴趣、工程准备和毕业要求并不完全一致。','研究职业探索'],['x03','休整与探索','暂停之后如何恢复','你希望重新行动，但不想立即回到透支节奏。','小步恢复'],['x04','过渡就业','过渡工作占满准备时间','现金流改善，学习和求职时间却变少。','时间边界'],['x05','其他技术','岗位比名称具体','实施、运维、测试与数据支持的日常任务不同。','具体任务匹配'],['x06','考试与公共服务','另一条路也有门槛','报考资格、准备周期和工作内容需要核实。','资格与准备周期']
 ];
-routeEvents.forEach(([id,route,title,body,focus])=>EVENT_BANK.push(e(id,'growth',title,body,[o('拆成一个可验证的小目标',{project:8,interview:5,energy:-4},undefined,undefined,`先确认${focus}。`,'scoped'),o('向从业者了解实际任务',{interview:10,stress:-3},undefined,undefined,'','contact'),o('尝试一份相关机会',{energy:-4},route==='研究 / 深造'?'apply-research':route==='自由职业'?'freelance':'apply-other',route),o('保留生活缓冲再推进',{money:600,energy:8,stress:-4})],g=>g.route===route)));
+routeEvents.forEach(([id,route,title,body,focus])=>EVENT_BANK.push(e(id,'growth',title,body,[o('拆成一个可验证的小目标',{project:8,interview:5,energy:-4},undefined,undefined,`先确认${focus}。`,'scoped'),o('向从业者了解实际任务',{interview:10,stress:-3},undefined,undefined,'','contact'),o('尝试一份相关机会',{energy:-4},route==='自由职业'?'freelance':route==='休整与探索'?'apply-development':route==='过渡就业'?'bridge':'apply',route),o('保留生活缓冲再推进',{money:600,energy:8,stress:-4})],g=>g.route===route)));
 export const PLAN:Stage[]=['explore','explore','build','build','intern','intern','interview','build','intern','interview','choice','region','academic','interview','academic','graduate','entry','entry','growth','growth','change','region','growth','settle','settle','settle'];
 export const EVENT_COUNT=EVENT_BANK.length;
 function hash(s:string){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0;}
@@ -116,13 +125,18 @@ export function selectEvent(g:Game):GameEvent{
  if(stage==='build'){const special=pool.filter(e=>e.id.startsWith('d'));if(special.length&&hash(g.id+g.step)%2===0)pool=special;}
  const fresh=pool.filter(e=>!g.recentEvents.includes(e.id));if(fresh.length)pool=fresh;
  const spec=pool[hash(g.id+'-'+g.step+'-'+g.route)%pool.length];
- let body=spec.body+` 你现在在${g.city}，${cityInfo(g.city).region}。`;
+ let body=stage==='region'?`${spec.body} 你目前在${g.city}。`:spec.body;
  if(g.flags.includes('deployed')&&stage==='interview')body+=' 你已经有可运行的作品，可以用它说明实际贡献。';
  if(g.flags.includes('scoped')&&stage==='growth')body+=' 你之前练习过明确范围，这次可以用上。';
- if(g.stats.money<1500)body+=' 当前储备偏少，选择时也要考虑近期生活。';
+
  let options=spec.options.map(c=>({...c,effects:{...c.effects}}));
+ if(g.step===17)options[3]=o('按当前方向申请一次机会',{interview:6,energy:-4},'apply');
+ if(g.step===22&&!g.employment)options[3]=o('再投一次当前方向的岗位',{interview:7,energy:-5},'apply');
  if(spec.id==='choose'&&g.degree==='博士')options[2]=o('先验证行业研究岗位',{research:8,interview:5},'apply-research','研究 / 深造');
  if(spec.id==='choose'&&g.degree==='硕士')options[2].label='申请博士，继续研究';
  if(stage==='region'){const next=CITIES[(CITIES.indexOf(g.city)+5+hash(g.id)%7)%CITIES.length];options=options.map(c=>c.action==='move-next'?{...c,label:`去${next}尝试新的机会`,city:next}:c);}
+ const showHint=hash(g.id+'hint'+g.step)%3===0;
+ const hintIndex=showHint?options.findIndex(option=>option.hint):-1;
+ options=options.map((option,index)=>index===hintIndex?option:{...option,hint:undefined});
  return {id:spec.id,tag:{explore:'探索起点',build:'积累证据',intern:'实习现场',interview:'招聘与面试',choice:'路线分岔',region:'城市与流动',academic:'学业与生活',graduate:'毕业节点',entry:'入行与尝试',growth:'工作与转向',change:'再次选择',settle:'两年之后'}[stage],title:spec.title,body,options};
 }
