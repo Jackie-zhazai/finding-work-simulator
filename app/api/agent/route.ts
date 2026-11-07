@@ -1,6 +1,9 @@
 import { setting } from '../../../lib/runtime';
 import { z } from 'zod';
 
+export const runtime = 'nodejs';
+export const maxDuration = 300;
+
 const rates=new Map<string,{count:number;time:number}>();
 let dailyModelCalls={day:'',count:0};
 const stats=z.object({skill:z.number().min(0).max(100),project:z.number().min(0).max(100),interview:z.number().min(0).max(100),energy:z.number().min(0).max(100),money:z.number().min(-1000000).max(1000000),stress:z.number().min(0).max(100),research:z.number().min(0).max(100)});
