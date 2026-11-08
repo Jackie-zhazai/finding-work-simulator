@@ -23,7 +23,7 @@ const raw:[string,Stage,string,string,Choice[]][]=[
  ['b07','build','作品没有用户反馈','你不断增加功能，却不确定解决了谁的问题。',[o('找三位同学实际使用',{interview:8,project:7},undefined,undefined,'','user-research'),o('删掉多余功能',{project:7,stress:-3}),o('写清使用场景与限制',{interview:7,project:5},undefined,undefined,'','evidence'),o('继续增加技术复杂度',{skill:9,energy:-7})]],
  ['b08','build','学习资料看了很多','收藏夹越来越长，但你还没有可以讲清的成果。',[o('限定一周做出小作品',{project:10,energy:-6}),o('复盘一个完整知识点',{skill:8,interview:4}),o('边写边记录失败原因',{skill:6,project:7},undefined,undefined,'','evidence'),o('清理计划，只留一个目标',{energy:8,stress:-6,project:3})]],
  ['i01','intern','一份没有写清职责的实习','招聘页写着开发，沟通后却主要是整理表格和维护内容。',[o('先问清实际任务和导师',{interview:8},undefined,undefined,'','verified-role'),o('接受，优先获得收入',{money:1600,energy:-6},'bridge'),o('争取加入一个开发任务',{project:5,interview:6},'apply'),o('放弃这次，继续匹配岗位',{energy:-5,stress:3},'apply')]],
- ['i02','intern','实习要求连续到岗六个月','这段时间可能与课程、毕业或下一轮招聘冲突。',[o('协商三个月并明确交付',{interview:9,energy:-3},'apply'),o('接受较长安排',{project:10,money:1600,energy:-10,stress:4},'intern'),o('找短期或假期岗位',{energy:-5},'apply'),o('先完成毕业任务',{research:10,stress:-4})]],
+ ['i02','intern','实习要求连续到岗六个月','这段时间可能与课程、毕业或下一轮招聘冲突。',[o('争取三个月，约定阶段交付',{interview:9,energy:-3},'apply-short'),o('申请六个月实习，拿到机会再确认',{energy:-5},'apply-long'),o('找短期或假期岗位',{energy:-5},'apply-short'),o('先完成毕业任务',{research:10,stress:-4})]],
  ['i03','intern','实习机会在另一座城','搬家和押金需要先支付，收入要到下个月才到账。',[o('确认合同与预算后再去',{interview:5,money:-1200},'apply',undefined,'前期支出明确，机会仍不确定。'),o('先找当地同学了解住宿',{interview:7,money:-300}),o('优先当前城市机会',{energy:-4},'apply'),o('尝试远程短期协作',{project:6,money:500},undefined,'自由职业')]],
  ['i04','intern','导师很忙，任务却不少','实习中遇到的问题无人立即回答，交付时间仍在接近。',[o('整理问题，约定集中沟通',{interview:8,project:6}),o('先独立定位最小问题',{skill:9,project:5,energy:-6},undefined,undefined,'','debugged'),o('明确风险并调整交付',{interview:9,stress:-3}),o('加班兜底全部任务',{project:10,energy:-14,stress:8})]],
  ['i05','intern','两份实习邀请','一份内容相关但补贴少，另一份收入较好但任务偏重复。',[o('选择相关任务，控制预算',{project:10,money:-500,energy:-6},'intern'),o('选择收入，另留学习时间',{money:1800,skill:4,energy:-8},'bridge'),o('进一步确认导师与转正规则',{interview:10}),o('继续寻找第三种安排',{stress:4,energy:-5},'apply')]],
@@ -114,10 +114,12 @@ const routeEvents:[string,string,string,string,string][]=[
 ];
 routeEvents.forEach(([id,route,title,body,focus])=>EVENT_BANK.push(e(id,'growth',title,body,[o('拆成一个可验证的小目标',{project:8,interview:5,energy:-4},undefined,undefined,`先确认${focus}。`,'scoped'),o('向从业者了解实际任务',{interview:10,stress:-3},undefined,undefined,'','contact'),o('尝试一份相关机会',{energy:-4},route==='自由职业'?'freelance':route==='休整与探索'?'apply-development':route==='过渡就业'?'bridge':'apply',route),o('保留生活缓冲再推进',{money:600,energy:8,stress:-4})],g=>g.route===route)));
 export const PLAN:Stage[]=['explore','explore','build','build','intern','intern','interview','build','intern','interview','choice','region','academic','interview','academic','graduate','entry','entry','growth','growth','change','region','growth','settle','settle','settle'];
+export const SHORT_STEPS=[0,2,4,6,8,10,11,12,15,16,17,18,20,21,22,25];
 export const EVENT_COUNT=EVENT_BANK.length;
 function hash(s:string){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0;}
 export function selectEvent(g:Game):GameEvent{
- const stage=PLAN[Math.min(g.step,PLAN.length-1)];
+ const step=g.shortRun?SHORT_STEPS[Math.min(g.step,SHORT_STEPS.length-1)]:Math.min(g.step,PLAN.length-1);
+ const stage=PLAN[step];
  let pool=EVENT_BANK.filter(e=>e.stage===stage&&(!e.when||e.when(g))&&!g.history.some(h=>h.eventId===e.id));
  if(!pool.length)pool=EVENT_BANK.filter(e=>e.stage===stage&&(!e.when||e.when(g)));
  // Route follow-ups can replace shared growth moments, but are not compulsory every time.
@@ -130,8 +132,11 @@ export function selectEvent(g:Game):GameEvent{
  if(g.flags.includes('scoped')&&stage==='growth')body+=' 你之前练习过明确范围，这次可以用上。';
 
  let options=spec.options.map(c=>({...c,effects:{...c.effects}}));
- if(g.step===17)options[3]=o('按当前方向申请一次机会',{interview:6,energy:-4},'apply');
- if(g.step===22&&!g.employment)options[3]=o('再投一次当前方向的岗位',{interview:7,energy:-5},'apply');
+ if(step===17)options[3]=o('按当前方向申请一次机会',{interview:6,energy:-4},'apply');
+ if(step===22&&!g.employment)options[3]=o('再投一次当前方向的岗位',{interview:7,energy:-5},'apply');
+ if((stage==='academic'||stage==='graduate')&&g.employment?.months===6){
+  options[1]=o('协商缩短实习，完成交接后退出',{research:8,interview:4},'end-internship',undefined,'会释放毕业准备时间，但这份实习收入和转正机会会中止。');
+ }
  if(spec.id==='choose'&&g.degree==='博士')options[2]=o('先验证行业研究岗位',{research:8,interview:5},'apply-research','研究 / 深造');
  if(spec.id==='choose'&&g.degree==='硕士')options[2].label='申请博士，继续研究';
  if(stage==='region'){const next=CITIES[(CITIES.indexOf(g.city)+5+hash(g.id)%7)%CITIES.length];options=options.map(c=>c.action==='move-next'?{...c,label:`去${next}尝试新的机会`,city:next}:c);}
