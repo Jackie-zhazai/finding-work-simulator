@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
-.outcome-path{list-style:none;margin:14px 0 18px;padding:0 0 0 14px;border-left:1px solid var(--line)}
-.outcome-path li{padding:0 0 16px}
-.outcome-path li:last-child{padding-bottom:0}
-.outcome-path small{display:block;color:var(--muted);font-size:11px}
-.outcome-path strong{display:block;margin:4px 0;font-size:14px}
-.outcome-path p{font-size:13px}
+.outcome-path{margin:16px 0 20px;padding-left:14px;border-left:1px solid var(--line);font-family:inherit}
+.outcome-path article+article{margin-top:18px}
+.outcome-path .path-meta{display:block;color:var(--muted);font-size:12px;line-height:1.5}
+.outcome-path .path-choice{display:block;margin:4px 0;font-size:15px;font-weight:600;line-height:1.55}
+.result-timeline .outcome-path p{margin:0;font-size:14px;line-height:1.65;overflow-wrap:anywhere}
+.path-footer{font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif;font-size:12px;letter-spacing:normal}
 
 .practice-fields{margin-bottom:26px;padding-bottom:24px;border-bottom:1px solid var(--line)}
 .practice-prompt{display:flex;align-items:center;gap:10px;margin:16px 0;padding:12px;border:1px solid var(--line);font-size:13px}

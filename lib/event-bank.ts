@@ -120,6 +120,20 @@ function hash(s:string){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(
 export function selectEvent(g:Game):GameEvent{
  const step=g.shortRun?SHORT_STEPS[Math.min(g.step,SHORT_STEPS.length-1)]:Math.min(g.step,PLAN.length-1);
  const stage=PLAN[step];
+ const defaultTarget=g.profile.direction==='尚未确定'?'软件开发':g.profile.direction;
+ const target=['开发','自由职业','休整与探索','过渡就业'].includes(g.route)?defaultTarget:g.route;
+ if(step===25&&!g.employment){
+  return {
+   id:'last-search',tag:'毕业后两年',title:'给下一轮求职留一个入口',
+   body:`你还没有落实岗位。现在的目标是${target}。你可以投一批匹配的岗位，也可以先解决收入或准备时间的问题。`,
+   options:[
+    o(`投递${target}方向的匹配岗位`,{interview:6,energy:-4},'apply'),
+    o('留在当前城市，找愿意带新人的团队',{interview:6,energy:-3},'apply-local',undefined,'保留目标方向，优先申请有明确带教和入门任务的岗位。'),
+    o('接受一份过渡工作，给自己留出求职时间',{energy:-3,stress:-4},'bridge','过渡就业'),
+    o('先休整并整理两份可展示的经历',{energy:12,project:8,stress:-7},'rest','休整与探索'),
+   ],
+  };
+ }
  let pool=EVENT_BANK.filter(e=>e.stage===stage&&(!e.when||e.when(g))&&!g.history.some(h=>h.eventId===e.id));
  if(!pool.length)pool=EVENT_BANK.filter(e=>e.stage===stage&&(!e.when||e.when(g)));
  // Route follow-ups can replace shared growth moments, but are not compulsory every time.
@@ -132,8 +146,13 @@ export function selectEvent(g:Game):GameEvent{
  if(g.flags.includes('scoped')&&stage==='growth')body+=' 你之前练习过明确范围，这次可以用上。';
 
  let options=spec.options.map(c=>({...c,effects:{...c.effects}}));
- if(step===17)options[3]=o('按当前方向申请一次机会',{interview:6,energy:-4},'apply');
- if(step===22&&!g.employment)options[3]=o('再投一次当前方向的岗位',{interview:7,energy:-5},'apply');
+ if(step===17)options[3]=o(`申请与你的目标匹配的岗位（${target}）`,{interview:6,energy:-4},'apply');
+ if(step===22&&!g.employment){
+  options[3]=o(`带着已有经历，申请${target}岗位`,{interview:7,energy:-5},'apply-local');
+  if(hash(g.id+'public')%3===0){
+   options[2]=o('申请公共服务项目，同时继续备考',{research:8,interview:5,energy:-5},'apply-public','考试与公共服务');
+  }
+ }
  if((stage==='academic'||stage==='graduate')&&g.employment?.months===6){
   options[1]=o('协商缩短实习，完成交接后退出',{research:8,interview:4},'end-internship',undefined,'会释放毕业准备时间，但这份实习收入和转正机会会中止。');
  }
