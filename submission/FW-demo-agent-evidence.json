@@ -1,0 +1,56 @@
+{
+  "scenario": "演示用虚拟角色，生产站真实模型请求",
+  "frames": [
+    {
+      "label": "公开首页",
+      "at": "2026-11-08T05:37:25.722Z"
+    },
+    {
+      "label": "真实 MiMo 途中指导",
+      "at": "2026-11-08T05:37:56.543Z"
+    },
+    {
+      "label": "结局路径",
+      "at": "2026-11-08T05:38:21.836Z"
+    },
+    {
+      "label": "真实 MiMo 行动单和质量检查",
+      "at": "2026-11-08T05:38:49.940Z"
+    },
+    {
+      "label": "真实 Agent 运行记录",
+      "at": "2026-11-08T05:38:57.533Z"
+    }
+  ],
+  "advice": {
+    "workflowId": "7be34778-0869-4d02-95b7-014ce2feaa68",
+    "model": "mimo-v2.6-pro",
+    "trace": [
+      {
+        "task": "途中指导",
+        "status": "completed",
+        "durationMs": 8932,
+        "tokens": 1225
+      }
+    ]
+  },
+  "plan": {
+    "workflowId": "b703808c-8ba2-472d-89c5-c614c455c38b",
+    "model": "mimo-v2.6-pro",
+    "trace": [
+      {
+        "task": "求职策略",
+        "status": "completed",
+        "durationMs": 13192,
+        "tokens": 4690
+      },
+      {
+        "task": "质量检查",
+        "status": "completed",
+        "durationMs": 7440,
+        "tokens": 4568
+      }
+    ],
+    "checked": true
+  }
+}
